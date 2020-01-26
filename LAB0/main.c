@@ -18,7 +18,18 @@
  * 
  */
 int main(int argc, char** argv) {
-
+    char tempL[MAX_LEN];
+    printf("Enter File Location");
+    scanf ("%s", tempL);
+    FILE *in_file = fopen(tempL, "r"); //read
+    FILE *out_file = fopen(tempL, "w"); // write
+    
+    if (in_file == NULL || out_file == NULL){
+        printf("Could not find file");
+        exit(-1);
+    }
+    
+    
     return (EXIT_SUCCESS);
 }
 
