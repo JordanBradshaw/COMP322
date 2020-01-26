@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
     return (EXIT_SUCCESS);
 }
 
-    int convert(int n){ //Convert from binary to Decimal
+    int convert(int n){ //Convert from binary to 
         int convertD = 0, i = 0, remainder;
         while (n !=0){
             remainder = n %10;
