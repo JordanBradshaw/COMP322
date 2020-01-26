@@ -18,17 +18,20 @@
  * 
  */
 int main(int argc, char** argv) {
-    char tempL[MAX_LEN];
-    printf("Enter File Location");
-    scanf ("%s", tempL);
-    FILE *in_file = fopen(tempL, "r"); //read
-    FILE *out_file = fopen(tempL, "w"); // write
-    
-    if (in_file == NULL || out_file == NULL){
-        printf("Could not find file");
+    int number;
+    char tempL[10000];
+    printf("Enter the files location: \n");
+    scanf("%s", tempL);
+    FILE *fileL = fopen(tempL, "r"); //read
+
+    if (fileL == NULL){ //if file fails run this
+        printf("Could not find file\n");
         exit(-1);
     }
-    
+    while (fscanf(fileL, "%d", & number) ==1){
+    printf("Line that's contained in text file is:\n%d ", number);
+    }
+    printf(" %c", number);
     
     return (EXIT_SUCCESS);
 }
