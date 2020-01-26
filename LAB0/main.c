@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
 /*
  * 
  */
@@ -31,8 +32,19 @@ int main(int argc, char** argv) {
     while (fscanf(fileL, "%d", & number) ==1){
     printf("Line that's contained in text file is:\n%d ", number);
     }
-    printf(" %c", number);
+    printf("Decimal: %d", convert(number));
+    
     
     return (EXIT_SUCCESS);
 }
 
+    int convert(int n){ //Convert from binary to Decimal
+        int convertD = 0, i = 0, remainder;
+        while (n !=0){
+            remainder = n %10;
+            n /=10;
+            convertD += remainder * pow(2,i);
+            ++i;
+        } return convertD;
+        
+    }
