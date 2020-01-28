@@ -20,6 +20,12 @@
 /*
  * 
  */
+void DecodeText(int number) {
+    printf("Decimal: %d", ConvertD(number));
+    printf(" ASCII is: %c", ConvertD(number));
+    printf(" Parity is: %s", getParity(ConvertD(number)) ? "odd" : "even");
+}
+
 int main(int argc, char** argv) {
     int number;
     char tempL[10000];
@@ -32,12 +38,10 @@ int main(int argc, char** argv) {
         exit(-1);
     }
     while (fscanf(fileL, "%d", & number) == 1) {
-        printf("Line that's contained in text file is:\n%d ", number);
+        printf("\nLine that's contained in text file is:\n%d ", number);
+        DecodeText(number);
     }
-    printf("Decimal: %d", ConvertD(number));
-    printf(" ASCII is: %c", ConvertD(number));
-    
-    printf(" Parity is: %s", getParity(ConvertD(number))? "odd": "even");
+
     return (EXIT_SUCCESS);
 }
 
@@ -52,13 +56,13 @@ int ConvertD(int n) { //Convert from binary to decimal
     return convertD;
 
 }
-bool getParity(unsigned int n) 
-{ 
-    bool parity = 0; 
-    while (n) 
-    { 
-        parity = !parity; 
-        n      = n & (n - 1); 
-    }         
-    return parity; 
+
+bool getParity(unsigned int n) {
+    bool parity = 0;
+    while (n) {
+        parity = !parity;
+        n = n & (n - 1);
+    }
+    return parity;
 }
+
