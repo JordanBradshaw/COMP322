@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include<string.h>
+#define bool int
 
 /*
  * 
@@ -34,8 +35,9 @@ int main(int argc, char** argv) {
         printf("Line that's contained in text file is:\n%d ", number);
     }
     printf("Decimal: %d", ConvertD(number));
-    printf("ASCII is: %c", ConvertD(number));
-    printf("Parity is: %d", GetParity(number));
+    printf(" ASCII is: %c", ConvertD(number));
+    
+    printf(" Parity is: %s", getParity(ConvertD(number))? "odd": "even");
     return (EXIT_SUCCESS);
 }
 
@@ -50,19 +52,13 @@ int ConvertD(int n) { //Convert from binary to decimal
     return convertD;
 
 }
-void GetParity(int n){
-    int parity =0;
-    int intlength = strlen(n);
-    char array[sizeof(n)];
-    snprintf(array, "%d" , n);
-    for (int i = 0; i < intlength; i++){
-        if (array[i] == '1'){
-            parity++;
-        }else{
-            
-        }
-    }
-    
-    
-    
+bool getParity(unsigned int n) 
+{ 
+    bool parity = 0; 
+    while (n) 
+    { 
+        parity = !parity; 
+        n      = n & (n - 1); 
+    }         
+    return parity; 
 }
