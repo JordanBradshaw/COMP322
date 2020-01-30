@@ -21,9 +21,10 @@
  * 
  */
 void DecodeText(int number) {
-    printf("Decimal: %d", ConvertD(number));
-    printf(" ASCII is: %c", ConvertD(number));
-    printf(" Parity is: %s", getParity(ConvertD(number)) ? "odd" : "even");
+    printf("% 8d", ConvertD(number));
+    printf("% 8c", ConvertD(number));
+    printf("% 8s", getParity(ConvertD(number)) ? "odd" : "even");
+    printf("\n");
 }
 
 int main(int argc, char** argv) {
@@ -31,6 +32,7 @@ int main(int argc, char** argv) {
     char tempL[10000];
     printf("Enter the files location: \n");
     scanf("%s", tempL);
+        printf("BINARY    DECIMAL   ASCII  PARITY\n");
     FILE *fileL = fopen(tempL, "r"); //read
 
     if (fileL == NULL) { //if file fails run this
@@ -38,7 +40,9 @@ int main(int argc, char** argv) {
         exit(-1);
     }
     while (fscanf(fileL, "%d", & number) == 1) {
-        printf("\nLine that's contained in text file is:\n%d ", number);
+        int paddednumber;
+        printf("%08d ", number);
+       
         DecodeText(number);
     }
 
