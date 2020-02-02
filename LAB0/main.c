@@ -20,40 +20,14 @@
 /*
  * 
  */
-void DecodeText(int number) {
-    printf("% 8d", ConvertD(number));
-    printf("% 8c", ConvertD(number));
-    printf("% 8s", getParity(ConvertD(number)) ? "odd" : "even");
-    printf("\n");
-}
 
-int main(int argc, char** argv) {
-    int number;
-    char tempL[10000];
-    printf("Enter the files location: \n");
-    scanf("%s", tempL);
-        printf("BINARY    DECIMAL   ASCII  PARITY\n");
-    FILE *fileL = fopen(tempL, "r"); //read
 
-    if (fileL == NULL) { //if file fails run this
-        printf("Could not find file\n");
-        exit(-1);
-    }
-    while (fscanf(fileL, "%d", & number) == 1) {
-        int paddednumber;
-        printf("%08d ", number);
-       
-        DecodeText(number);
-    }
-
-    return (EXIT_SUCCESS);
-}
-
-int ConvertD(int n) { //Convert from binary to decimal
+int ConvertD(char *n) { //Convert from binary to decimal
     int convertD = 0, i = 0, remainder;
-    while (n != 0) {
-        remainder = n % 10;
-        n /= 10;
+    int numberConv = atoi(n);
+    while (numberConv != 0) {
+        remainder = numberConv % 10;
+        numberConv /= 10;
         convertD += remainder * pow(2, i);
         ++i;
     }
@@ -61,7 +35,7 @@ int ConvertD(int n) { //Convert from binary to decimal
 
 }
 
-bool getParity(unsigned int n) {
+bool getParity(int n) {
     bool parity = 0;
     while (n) {
         parity = !parity;
@@ -69,4 +43,41 @@ bool getParity(unsigned int n) {
     }
     return parity;
 }
+
+void DecodeText(char *number) {
+    printf("% 8s", number);
+    printf("% 8d", ConvertD(number));
+    printf("% 8c", ConvertD(number));
+    printf("% 8s", getParity(ConvertD(number)) ? "odd" : "even");
+    printf("\n");
+}
+
+int main(int argc, char** argv) {
+    char number[20];
+    char tempL[10000];
+    printf("Enter the files location: \n");
+    scanf("%s", tempL);
+    printf("BINARY   DECIMAL   ASCII  PARITY\n");
+    FILE *fileL = fopen(tempL, "r"); //read
+
+    if (fileL == NULL) { //if file fails run this
+        printf("Could not find file\n");
+        exit(-1);
+    }
+    while (fscanf(fileL, "%s", number) == 1) {
+        char buffer[9];
+        int digits;
+        snprintf(buffer, 9, "%s", number);
+        digits = strlen(buffer);
+
+        for (int i = digits; i < 8; i++) {
+            buffer[i] = '0';
+        }
+        DecodeText(buffer);
+    }
+
+    return (EXIT_SUCCESS);
+}
+
+
 
