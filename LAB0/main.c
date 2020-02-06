@@ -45,7 +45,8 @@ bool getParity(int n) {
 }
 
 void DecodeText(char *number) {
-    printf("% 8s", number);
+    printf("%08s", number);
+    //printf("% 8s", number);
     printf("% 8d", ConvertD(number));
     printf("% 8c", ConvertD(number));
     printf("% 8s", getParity(ConvertD(number)) ? "odd" : "even");
@@ -65,7 +66,10 @@ int main(int argc, char** argv) {
         exit(-1);
     }
     while (fscanf(fileL, "%s", number) == 1) {
-        char buffer[9];
+        
+        
+        
+        /*char buffer[9]; Padding left
         int digits;
         snprintf(buffer, 9, "%s", number);
         digits = strlen(buffer);
@@ -73,7 +77,8 @@ int main(int argc, char** argv) {
         for (int i = digits; i < 8; i++) {
             buffer[i] = '0';
         }
-        DecodeText(buffer);
+        DecodeText(buffer);*/
+        DecodeText(number);
     }
 
     return (EXIT_SUCCESS);
