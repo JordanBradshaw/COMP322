@@ -45,8 +45,8 @@ bool getParity(int n) {
 }
 
 void DecodeText(char *number) {
-    printf("%08s", number);
-    //printf("% 8s", number);
+    //printf("%08s", number);
+    printf("% 8s", number);
     printf("% 8d", ConvertD(number));
     printf("% 8c", ConvertD(number));
     printf("% 8s", getParity(ConvertD(number)) ? "odd" : "even");
@@ -56,10 +56,8 @@ void DecodeText(char *number) {
 int main(int argc, char** argv) {
     char number[20];
     char tempL[10000];
-    printf("Enter the files location: \n");
-    scanf("%s", tempL);
     printf("BINARY   DECIMAL   ASCII  PARITY\n");
-    FILE *fileL = fopen(tempL, "r"); //read
+    FILE *fileL = fopen(argv[1], "r"); //read
 
     if (fileL == NULL) { //if file fails run this
         printf("Could not find file\n");
@@ -67,9 +65,7 @@ int main(int argc, char** argv) {
     }
     while (fscanf(fileL, "%s", number) == 1) {
         
-        
-        
-        /*char buffer[9]; Padding left
+        char buffer[9];
         int digits;
         snprintf(buffer, 9, "%s", number);
         digits = strlen(buffer);
@@ -77,8 +73,8 @@ int main(int argc, char** argv) {
         for (int i = digits; i < 8; i++) {
             buffer[i] = '0';
         }
-        DecodeText(buffer);*/
-        DecodeText(number);
+        DecodeText(buffer);
+        //DecodeText(number);
     }
 
     return (EXIT_SUCCESS);
