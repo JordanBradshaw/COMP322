@@ -25,7 +25,21 @@
  */
 
 
+int ConvertDIgn(char *n) { //Convert from binary to decimal
+    n[0] = '0';
+    int convertD = 0, i = 0, remainder;
+    int numberConv = atoi(n);
+    while (numberConv != 0) {
+        remainder = numberConv % 10;
+        numberConv /= 10;
+        convertD += remainder * pow(2, i);
+        ++i;
+    }
+    return convertD;
+}
+
 int ConvertD(char *n) { //Convert from binary to decimal
+
     int convertD = 0, i = 0, remainder;
     int numberConv = atoi(n);
     while (numberConv != 0) {
@@ -100,8 +114,8 @@ void DecodeText(char *number) {
     //printf("%08s", number);
     int decimal;
     printf("% 8s", number);
-    printf("% 8d", ConvertD(number));
-    decimal = ConvertD(number);
+    printf("% 8d", ConvertDIgn(number));
+    decimal = ConvertDIgn(number);
     getASCII(decimal);
     printf("% 8s", getParity(ConvertD(number)) ? "odd" : "even");
     printf("\n");
@@ -164,8 +178,7 @@ int main(int argc, char** argv) {
             DecodeText(buffer);
         }
 
-    }
-    else {
+    } else {
 
         for (int i = 1; i < argc; i++) {
             char buffer[9];
