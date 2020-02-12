@@ -26,9 +26,11 @@
 
 
 int ConvertDIgn(char *n) { //Convert from binary to decimal
-    n[0] = '0';
+    char temp[8];
+    memcpy(temp, n, sizeof temp);
+    temp[0] = '0';
     int convertD = 0, i = 0, remainder;
-    int numberConv = atoi(n);
+    int numberConv = atoi(temp);
     while (numberConv != 0) {
         remainder = numberConv % 10;
         numberConv /= 10;
