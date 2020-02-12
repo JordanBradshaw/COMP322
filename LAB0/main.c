@@ -26,7 +26,7 @@
 
 
 int ConvertDIgn(char *n) { //Convert from binary to decimal
-    char temp[8];
+    char temp[9];
     memcpy(temp, n, sizeof temp);
     temp[0] = '0';
     int convertD = 0, i = 0, remainder;
