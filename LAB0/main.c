@@ -63,6 +63,20 @@ bool getParity(int n) {
     return parity;
 }
 
+int contains01(char *n) {
+    int counter = 0;
+    char temp[9];
+    memcpy(temp, n, sizeof temp);
+    for (int i = 0; i < 8; i++) {
+        if (temp[i] == '0' || temp[i] == '1') {
+
+        } else {
+            counter++;
+        }
+    }
+    return counter;
+}
+
 void getASCII(int n) {
     char* keys[50][6];
     keys[0][0] = "NUL";
@@ -113,6 +127,11 @@ void getASCII(int n) {
 }
 
 void DecodeText(char *number) {
+    if (contains01(number) != 0){
+        system("clear");
+        printf("The data contained a char that was not 0 or 1");
+        exit(0);
+    }
     //printf("%08s", number);
     int decimal;
     printf("% 8s", number);
@@ -132,7 +151,7 @@ int main(int argc, char** argv) {
     char *token;
     const char sp[2] = " ";
     printf("BINARY   DECIMAL   ASCII  PARITY\n");
-    if (argc == 2 && (argv[1] != '-')) {
+    if (argc == 2 && strcmp(argv[1], ("-")) != 0) {
         FILE *fileL = fopen(argv[1], "r"); //read
         if (fileL == NULL) { //if file fails run this
             printf("Could not find file\n");
