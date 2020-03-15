@@ -42,7 +42,37 @@
 #     CND_PACKAGE_PATH_${CONF}   path to package (current configuration)
 #
 # NOCDDL
+EXECUTABLES = launch tube
+LAUNCH=launch
+TUBE=tube
+SRC=launch.c tube.c
+OBJ=launch.o tube.o
+SRC1=launch.c
+OBJ1=launch.o
+SRC2=tube.c
+OBJ2=tube.o
 
+CC=gcc
+CFLAGS=-g
+
+all: $(EXECUTABLES)
+launch: $(LAUNCH)
+tube: $(TUBE)
+
+$(EXECUTABLES): $(SRC)
+$(CC) $(CFLAGS) -c $(SRC)
+$(CC) $(CFLAGS) -o $@ $(OBJ)
+
+$(LAUNCH): $(SRC1)
+$(CC) $(CFLAGS) -c $(SRC1)
+$(CC) $(CFLAGS) -o $@ $(OBJ1)
+
+$(TUBE): $(SRC2)
+$(CC) $(CFLAGS) -c $(SRC2)
+$(CC) $(CFLAGS) -o $@ $(OBJ2)
+
+clean:
+rm -f $(EXECUTABLES) $(OBJ) *~
 
 # Environment 
 MKDIR=mkdir
