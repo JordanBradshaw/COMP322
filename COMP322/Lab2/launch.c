@@ -27,8 +27,29 @@ convertByte2Bit(int tempByte) {//BIT SHIFT TO GET VALUE
 }
 
 int main(int argc, char** argv) {
-    pid_t pid = fork(); //FORK AND DECLARE VARS
     char *newArg[argc];
+    char *newFilteredArg[argc - 1];
+
+    //printf("argc: %d\n", argc);
+    for (int i = 1; i < argc; i++) {
+        newArg[i - 1] = argv[i];
+        //printf("newArg[%d] = %s\n", i - 1, newArg[i - 1]);
+    }
+    for (int i = 1; i < (argc - 1); i++) {
+        newFilteredArg[i - 1] = newArg[i];
+        //printf("newFilteredArg[%d] = %s\n", i - 1, newFilteredArg[i - 1]);
+    }
+        char FILELOCATION1 = newArg[0];
+        //ewArg[0] = NULL;
+        //newArg[2] = NULL;
+        
+    
+    for (int i=0; i<=argc ; i++){
+        //printf("argv[%d] :%s\n", i,argv[i]);
+    }
+    newFilteredArg[argc - 1] = NULL;
+    pid_t pid = fork(); //FORK AND DECLARE VARS
+
     int childStatus = -1;
     pid_t wPID;
     bool validPID = (pid >= 0) ? true : false;
@@ -42,16 +63,22 @@ int main(int argc, char** argv) {
                 //printf("arv[]: %s\n", argv[i]);
             }
             newArg[k] = NULL;
-            char *newargv[] = {NULL, "-ls", "-ls", NULL};
+            const char *filename = "/bin/ls";
+            char *newargv[] = {"/bin/ls","-t", NULL};
             char *newenviron[] = {NULL};
-            if (argc != 2) {
-                fprintf(stderr, "Usage: %s <file-to-exec>\n", argv[0]);
-                exit(EXIT_FAILURE);
-            }
             newargv[0] = argv[1];
-            execve(newArg[0], newArg, newenviron);
-            perror("execve");
-            exit(0); //CLOSE WHEN FINISHED
+            /*execve(newArg[0], newArg, newenviron);
+            perror("execve");*/
+           /* if (execve(newArg[0], newFilteredArg, NULL) == -1) {
+                printf("Execve Error\n");
+                //printf("%s\n", argVar1[0]);
+            }*/
+            if (execve(newArg[0], newArg, newenviron) == -1) {
+                printf("Execve Error\n");
+                //printf("%s\n", argVar1[0]);
+            }
+           // execv(newargv[0], newargv);
+            return 1; //CLOSE WHEN FINISHED
         } else {//PID RETURNS PID OF CHILD (IN PARENT)
             fprintf(stderr, "Child PID: %d\n", pid);
             wPID = waitpid(pid, &childStatus, WUNTRACED); //WAIT FOR CHILD PROCESS TO STOP
