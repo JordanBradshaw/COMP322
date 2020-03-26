@@ -88,15 +88,74 @@ static int termcounter = 0;
     return -1;
 }*/
 
+const char* signalReturnVal(int tempSignal) {//CONVERTING SIGNALS TO STRINGS
+    if (tempSignal == 1) {
+        return "SIGHUP";
+    }
+    if (tempSignal == 2) {
+        return "SIGINT";
+    }
+    if (tempSignal == 3) {
+        return "SIGQUIT";
+    }
+    if (tempSignal == 6) {
+        return "SIGABRT";
+    }
+    if (tempSignal == 8) {
+        return "SIGFPE";
+    }
+    if (tempSignal == 9) {
+        return "SIGKILL";
+    }
+    if (tempSignal == 11) {
+        return "SIGSEGV";
+    }
+    if (tempSignal == 13) {
+        return "SIGPIPE";
+    }
+    if (tempSignal == 14) {
+        return "SIGALRM";
+    }
+    if (tempSignal == 15) {
+        return "SIGTERM";
+    }
+    if (tempSignal == 30) {
+        return "SIGUSR1";
+    }
+    if (tempSignal == 31) {
+        return "SIGUSR2";
+    }
+    if (tempSignal == 20) {
+        return "SIGCHLD";
+    }
+    if (tempSignal == 19) {
+        return "SIGCONT";
+    }
+    if (tempSignal== 17) {
+        return "SIGSTOP";
+    }
+    if (tempSignal == 18) {
+        return "SIGTSTP";
+    }
+    if (tempSignal == 21) {
+        return "SIGTTIN";
+    }
+    if (tempSignal == 22) {
+        return "SIGTTOU";
+    }
+    else{
+    return "Unidentified Signal";}
+}
+
 void handler(int signo) {//NEW HANDLER
     time(&seconds);
     counter++;
     signal(signo, handler);
     if (signo == SIGTERM) {
         termcounter++;
-        printf("%d signo received at %ld\n", signo, seconds);
+        printf("%s received at %ld\n", signalReturnVal(signo), seconds);
     } else
-        printf("%d signo received at %ld\n", signo, seconds);
+        printf("%s received at %ld\n", signalReturnVal(signo), seconds);
 }
 
 int main(int argc, char** argv) {
@@ -114,8 +173,8 @@ int main(int argc, char** argv) {
     signal(SIGIO, handler);
     signal(SIGKILL, handler);
     signal(SIGPIPE, handler);
-    signal(SIGPROF handler);
-    signal(SIGQUIT handler);
+    //signal(SIGPROF handler);
+    //signal(SIGQUIT handler);
     signal(SIGSEGV, handler);
     signal(SIGSTOP, handler);
     signal(SIGTSTP, handler);
@@ -128,7 +187,7 @@ int main(int argc, char** argv) {
     signal(SIGURG, handler);
     signal(SIGVTALRM, handler);
     signal(SIGXCPU, handler);
-    signal(SIGXFSZ handler);
+    //signal(SIGXFSZ handler);
     signal(SIGUSR1, handler);
     signal(SIGUSR2, handler);
     signal(SIGTERM, handler);
