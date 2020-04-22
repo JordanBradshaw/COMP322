@@ -22,10 +22,6 @@
 #include <semaphore.h>
 #include <pthread.h>
 
-//int N = 5;
-#define N 5
-#define LEFT (phnum+ 4) % N
-#define RIGHT (phnum + 1) % N
 #define THINKING 2
 #define HUNGRY 1
 #define EATING 0
@@ -34,17 +30,18 @@
 //int N;
 
 static int termcounter = 0;
-int counterArray[N];
+int *nPointer;
+int *counterPointer;
 sem_t mutex;
-sem_t chopSticks[N];
+sem_t *chopSticksPointer;
 time_t seconds;
-int state[N];
-int phil[N];
+int *statePointer;
+int *philPointer;
+int *cyclePointer;
 pid_t pid;
 //usleep(usec);
 void signalHandler(int);
 int sigflag;
-int cycleArray[N];
 
 const char* signalReturnVal(int tempSignal) {//CONVERTING SIGNALS TO STRINGS
     if (tempSignal == 15) {
@@ -53,12 +50,11 @@ const char* signalReturnVal(int tempSignal) {//CONVERTING SIGNALS TO STRINGS
 }
 
 void test(int phnum) {
-
-    if (state[phnum] == HUNGRY
-            && state[LEFT] != EATING
-            && state[RIGHT] != EATING) {
+    if (*(statePointer + phnum) == HUNGRY
+            && (statePointer + (phnum+ 4) % nPointer) != EATING
+            && (statePointer + (phnum + 1) % nPointer) != EATING) {
         // state that eating 
-        state[phnum] = EATING;
+        *(statePointer + phnum) = EATING;
         //printf("Philosopher %d takes fork %d and %d\n", phnum + 1, LEFT + 1, phnum + 1);
         printf("Philosopher %d is eating.\n", phnum + 1);
         // sem_post(&S[phnum]) has no effect 
@@ -66,15 +62,15 @@ void test(int phnum) {
         // used to wake up hungry philosophers 
         // during putfork 
         //printf("%d\n", phnum);
-        sem_post(&chopSticks[phnum]);
-        cycleArray[phnum]++;
+        sem_post((chopSticksPointer + phnum));
+        ++*(cyclePointer+phnum);
     }
 }
 
 void eat(int phnum) {
     sem_wait(&mutex);
     // state that hungry 
-    state[phnum] = HUNGRY;
+    *(statePointer + phnum) = HUNGRY;
     //printf("Philosopher %d is Hungry\n", phnum + 1);
     // eat if neighbours are not eating 
     test(phnum);
@@ -91,12 +87,12 @@ void eat(int phnum) {
 void think(int phnum) {
     sem_wait(&mutex);
     // state that thinking 
-    state[phnum] = THINKING;
+    *(statePointer + phnum) = THINKING;
     /*printf("Philosopher %d putting fork %d and %d down\n",
             phnum + 1, LEFT + 1, phnum + 1);*/
     printf("Philosopher %d is thinking.\n", phnum + 1);
-    test(LEFT);
-    test(RIGHT);
+    test((phnum+ 4) % nPointer);
+    test((phnum + 1) % nPointer);
     sem_post(&mutex);
     /*useconds_t usec = rand();
     printf("Think Seconds: %d\n", usec);
@@ -128,18 +124,23 @@ void* philospher(void* num) {
 }
 
 int main(int argc, char** argv) {
-    //N = 5;
+    int N = atoi(argv[1]);
+    int counterArray[N];
+    int state[N];
+    sem_t chopSticks[N];
+    int phil[N];
+    int cycleArray[N];
     signal(SIGTERM, handler);
-    /*phil = (int*) malloc(N * sizeof (int));
-    cycleArray = (int*) malloc(N * sizeof (int));
-    counterArray = (int*) malloc(N * sizeof (int));
-    state = (int*) malloc(N * sizeof (int));
-    phil = (int*) malloc(N * sizeof (int));
-    chopSticks = (sem_t*) malloc(N * sizeof (sem_t));*/
-
+    nPointer = &N;
+    counterPointer = counterArray;
+    statePointer = state;
+    chopSticksPointer = chopSticks;
+    philPointer = phil;
+    cyclePointer = cycleArray;
     for (int j = 0; j < N; j++) {
-        counterArray[j] = 0;
-        phil[j] = j;
+        printf("%d\n",N);
+        *(counterPointer + j) = 0;
+        *(philPointer + j) = j;
     }
     int i;
     pthread_t thread_id[N];
@@ -147,7 +148,7 @@ int main(int argc, char** argv) {
     // initialize the semaphores 
     sem_init(&mutex, 0, 1);
     for (i = 0; i < N; i++)
-        sem_init(&chopSticks[i], 0, 0);
+        sem_init((chopSticksPointer + i), 0, 0);
     for (i = 0; i < N; i++) {
         // create philosopher processes 
         pthread_create(&thread_id[i], NULL,
