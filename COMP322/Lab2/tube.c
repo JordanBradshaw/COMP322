@@ -23,7 +23,7 @@
  * 
  */
 
-convertByte2Bit(int tempByte) {//BIT SHIFT TO GET VALUE
+int convertByte2Bit(int tempByte) {//BIT SHIFT TO GET VALUE
     return ((tempByte >> 0) & 1);
 }
 
@@ -95,11 +95,9 @@ int main(int argc, char** argv) {
     if (pidA == 0) {//childA
         close(pipeA[0]); //CLOSE READ
         dup2(pipeA[1], STDOUT_FILENO); //DUP WRITE OF PIPE TO STDOUT
-        if (execve(argVar1[0], argVar1, newenv) == -1) {
-            printf("Child 1 Error\n");
-            //printf("%s\n", argVar1[0]);
-        }
-        //printf("This is line 1st line\n");
+        execve(argVar1[0], argVar1, newenv);
+        printf("This is line 1st line\n");
+        printf("This is line Second line\n");
         exit(0); //CLOSE WHEN FINISHED
     } else if (pidA > 0) {
         pid_t pidB = fork();
@@ -107,10 +105,7 @@ int main(int argc, char** argv) {
             //printf("Hi");
             close(pipeA[1]); //CLOSE WRITING
             dup2(pipeA[0], STDIN_FILENO); //DUP READ TO PIPE TO STDIN
-            if (execve(argVar2[0], argVar2, newenv) == -1) {
-                printf("Child 2 Error\n");
-            }
-            //printf("This is line 2nd line\n");
+            execve(argVar2[0], argVar2, newenv);
             //fprintf(stderr, "Failed to exe '%s'\n", args2[0]);
             exit(0);
         }
