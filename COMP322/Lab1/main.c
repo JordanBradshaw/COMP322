@@ -25,7 +25,7 @@
  * 
  */
 
-convertByte2Bit(int tempByte) {//BIT SHIFT TO GET VALUE
+int convertByte2Bit(int tempByte) {//BIT SHIFT TO GET VALUE
     return ((tempByte >> 0) & 1);
 }
 

@@ -181,7 +181,6 @@ int main(int argc, char** argv) {
                     int digits;
                     snprintf(buffer, 9, "%s", number);
                     digits = strlen(buffer);
-
                     for (int i = digits; i < 8; i++) {
                         buffer[i] = '0';
                     }
@@ -220,6 +219,3 @@ int main(int argc, char** argv) {
 
     return (EXIT_SUCCESS);
 }
-
-
-
