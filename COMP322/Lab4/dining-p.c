@@ -14,6 +14,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
 #include <signal.h>
 #include <string.h>
 #include <ctype.h>
@@ -54,7 +57,7 @@ void eat(struct thinker * phil) {
         printf("Philosopher %d is eating.\n", phil->current);
         usleep(rand() % 1000000);
     }
-    
+
 }
 
 void think(struct thinker * phil) {
@@ -90,16 +93,56 @@ void philBuild(char** argv, struct thinker * phil) {
     for (int i = 0; i < phil->total; ++i) {
         memset(stixBuffer, 0, 20);
         sprintf(stixBuffer, "chopStickNum%d", i);
-        phil->stix[i] = sem_open(&stixBuffer, O_CREAT, 0644, 1);
-        printf("Chopstick%d\n", i);
+        phil->stix[i] = sem_open(stixBuffer, O_CREAT, 0644, 1);
+        //printf("Chopstick%d\n", i);
+    }
+}
+
+void breakStix(struct thinker * phil) {
+    char stixBuffer[20];
+    for (int i = 0; i < phil->total; ++i) {
+        if (sem_close(phil->stix[i] == -1)) {
+            perror("Chopstick close error");
+        }
+        memset(stixBuffer, 0, 20);
+        sprintf(stixBuffer,"chopStickNum%d",i);
+    }
+    if (sem_unlink(stixBuffer) == -1){
+        //perror("ChopStick unlink error");
+    }
+}
+
+void groupFile() {
+    FILE *fptr;
+    struct stat buf;
+    char* line = NULL;
+    size_t len = 0;
+    if (stat("groupID.txt", &buf) == 0) {
+        fptr = fopen("groupID.txt", "r");
+        getline(&line, &len, fptr);
+        //printf("%d", getpid());
+        if (setpgid(getpid(), strtol(line, NULL, 10)) != 0) {
+            perror("setpgid() error");
+        }
+        fclose(fptr);
+    } else {
+        char buffer[32];
+        memset(buffer, '\0', 32);
+        fptr = fopen("groupID.txt", "w");
+        sprintf(buffer, "%d", getpgid(getpid()));
+        fwrite(buffer, sizeof (char), sizeof (buffer), fptr);
+        fclose(fptr);
     }
 }
 
 int main(int argc, char** argv) {
+    printf("PID: %d\n", getpid());
+    groupFile();
     struct thinker phil;
     philBuild(argv, &phil);
     signal(SIGTERM, handler);
     philCycle(&phil);
+    breakStix(&phil);
     fprintf(stderr, "Philosopher %d has cycled %d times.\n", phil.current, phil.cycles);
     return (EXIT_SUCCESS);
 }
