@@ -47,26 +47,38 @@ struct thinker {
     int left;
     int right;
     sem_t** stix;
+    sem_t* critStix;
 };
+
+int hold4(struct thinker * phil, int returnVal) {
+    if (returnVal == THINKING) {
+        return (sem_trywait(phil->critStix) >= 0) ? 1 : 0;
+    } else if (returnVal == 3) {
+        sem_post(phil->critStix);
+        return 1;
+    }
+    return 1;
+}
 
 const char* signalReturnVal(int tempSignal) {//CONVERTING SIGNALS TO STRINGS
     if (tempSignal == 15) {
         return "SIGTERM";
-    } else NULL;
+    }
+    return NULL;
 }
 
 void eat(struct thinker * phil) {
-    if (sem_wait(phil->stix[LEFT]) != EATING
-            && sem_wait(phil->stix[RIGHT]) != EATING) {
-        perror("hi");
+    if (sem_wait(phil->stix[LEFT]) != EATING && sem_wait(phil->stix[RIGHT]) != EATING) {
+        //perror("hi");
+        //printf("LEFT %d RIGHT %d", LEFT,RIGHT);
         printf("Philosopher %d is eating.\n", phil->current);
+        //phil->cycles++;
         usleep(rand() % 1000000);
     }
 }
 
 void think(struct thinker * phil) {
-    if (sem_post(phil->stix[LEFT]) != EATING &&
-            sem_post(phil->stix[RIGHT]) != EATING) {
+    if (sem_post(phil->stix[LEFT]) != EATING && sem_post(phil->stix[RIGHT]) != EATING) {
         printf("Philosopher %d is thinking.\n", phil->current);
         usleep(rand() % 1000000);
     }
@@ -78,16 +90,41 @@ void handler(int signo) {//NEW HANDLER
     if (signo == SIGTERM) {
         termcounter++;
         printf("%s received at %ld\n", signalReturnVal(signo), seconds);
+        
     } else {
     }
+}
+void breakStix(struct thinker * phil) {
+    char stixBuffer[30];
+    for (int i = 0; i < phil->total; ++i) {
+        if (sem_close(phil->stix[i]) == -1) {
+            fprintf(stderr, "Chopstick: %d could not be closed\n", i);
+           // perror("Chopstick Close");
+        }
+        memset(stixBuffer, 0, 30);
+        sprintf(stixBuffer, "chopStickNum%d", i);
+
+    if (sem_unlink(stixBuffer) == -1) {
+        //perror("ChopStick unlink error");
+    }}
+    sem_close(phil->critStix);
+    sem_unlink("chopStickCrit");
+    free(phil->stix);
 }
 
 void philCycle(struct thinker * phil) {
     while (termcounter == 0) {
-        eat(phil);
-        think(phil);
-        phil->cycles++;
+        if (hold4(phil, 2) == 1) {
+            eat(phil);
+            think(phil);
+            phil->cycles++;
+            hold4(phil, 3);
+        } else {
+            if (termcounter == 1)
+                break;
+        }
     }
+
 }
 
 void philBuild(char** argv, struct thinker * phil) {
@@ -101,23 +138,13 @@ void philBuild(char** argv, struct thinker * phil) {
         phil->stix[i] = sem_open(stixBuffer, O_CREAT, 0644, 1);
         //printf("Chopstick%d\n", i);
     }
-    phil->left = LEFT;
-    phil->right = RIGHT;
+    phil->cycles = 0;
+    phil->critStix = sem_open("chopStickCrit", O_CREAT, 0644, 1);
+    //phil->left = LEFT;
+    //phil->right = RIGHT;
 }
 
-void breakStix(struct thinker * phil) {
-    char stixBuffer[30];
-    for (int i = 0; i < phil->total; ++i) {
-        if (sem_close(phil->stix[i]) == -1) {
-            perror("Chopstick Close");
-        }
-        memset(stixBuffer, 0, 30);
-        sprintf(stixBuffer, "chopStickNum%d", i);
-    }
-    if (sem_unlink(stixBuffer) == -1) {
-        //perror("ChopStick unlink error");
-    }
-}
+
 
 void groupFile() {
     FILE *fptr;
@@ -132,8 +159,8 @@ void groupFile() {
         }
         fclose(fptr);
     } else {
-        char buffer[32];
-        memset(buffer, '\0', 32);
+        char buffer[30];
+        memset(buffer, '\0', 30);
         fptr = fopen("groupID.txt", "w");
         sprintf(buffer, "%d", getpgid(getpid()));
         fwrite(buffer, sizeof (char), sizeof (buffer), fptr);
@@ -147,14 +174,14 @@ void structCheck(struct thinker * phil) {
 
 int main(int argc, char** argv) {
     struct thinker phil;
-    printf("PID: %d\n", getpid());
+    //printf("PID: %d\n", getpid());
     groupFile();
     philBuild(argv, &phil);
     //leftRightCalculate(&phil);
     signal(SIGTERM, handler);
-    structCheck(&phil);
+    //structCheck(&phil);
     philCycle(&phil);
     breakStix(&phil);
-    fprintf(stderr, "Philosopher %d has cycled %d times.\n", phil.current, phil.cycles);
+    fprintf(stdout, "Philosopher %d has cycled %d times.\n", phil.current, phil.cycles);
     return (EXIT_SUCCESS);
 }
