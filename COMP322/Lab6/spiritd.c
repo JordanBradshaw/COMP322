@@ -21,45 +21,28 @@ static pid_t mole1;
 static pid_t mole2;
 static int num;
 
-
 void randomMoleChoose() {
     char mNum[30];
     num = rand() % 2;
     sprintf(mNum, "%d", num + 1);
     char *mArgv[] = {"mole", mNum, 0};
-    if ((int)mole1 > 0 && (int)mole2 > 0) {
-        if ((int)mNum == 1) {
-            kill(mole1, SIGTERM);
-            mole1 = fork();
-        } else {
-            kill(mole2, SIGTERM);
-            mole2 = fork();
+    if (num == 0) {
+        if (kill(mole1, SIGCHLD) < 0) {
+            fprintf(stderr, "already dead");
         }
-    } else if ((int)mole1 > 0 && (int)mole2 == NULL) {
-        if (mNum == 1) {
-            kill(mole1, SIGTERM);
-            mole1 = fork();
+        mole1 = fork();
+        if (mole1 == 0) {
+            execv(mArgv[0], mArgv);
         } else {
+            if (kill(mole2, SIGCHLD) < 0) {
+                fprintf(stderr, "already dead");
+            }
             mole2 = fork();
+            if (mole2 == 0) {
+                execv(mArgv[0], mArgv);
+
+            }
         }
-    } else if ((int) mole1 == NULL && (int)mole2 > 0) {
-        if ((int)mNum == 2) {
-            kill(mole2, SIGTERM);
-            mole2 = fork();
-        } else {
-            mole1 = fork();
-        }
-    }
-    else if ((int)mole1 == NULL && (int)mole2 == NULL) {
-        if ((int)mNum == 2) {
-            mole2 = fork();
-        } else {
-            mole1 = fork();
-        }
-    }
-    
-    if ((int)mole1 == 0 || (int)mole2 == 0) {
-        execv(mArgv[0], mArgv);
     }
 }
 
@@ -109,7 +92,6 @@ int main(int argc, char **argv) {
         while (1) {
             sleep(1);
         }
-        //pid_child_mole = fork();
     }
 
     return (0);

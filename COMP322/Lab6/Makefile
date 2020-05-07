@@ -1,36 +1,26 @@
 #Jordan Bradshaw
-#lab1
+#lab2
 
-#this is my makefile for my lab assignment, that allows me to easily and accurately rebuild the
-#lab assignment.
-
-# EXECUTABLES is a Make Variable (similar to an environment variable) that lists all the
-# "executables" associated with the lab. 
-EXECUTABLES=spiritd
-SRC=spiritd.c
-OBJ=spiritd.o
-
-# The CC and CFLAGS variables are defined to ensure I'm using the native compiler and
-# # that the correct command-line options are set
+EXECUTABLE-L=spiritd
+EXECUTABLE-T=mole
+SRC-L=spiritd.c
+SRC-T=mole.c
+OBJ-L=spiritd.o
+OBJ-T=mole.o
 
 CC=gcc
 CFLAGS=-g
 
-# Here is my default target for the Makefile.  When I type make, this first target will
-# # be created. I.e., all the executables
+all: $(EXECUTABLE-L) $(EXECUTABLE-T)
 
-all: $(EXECUTABLES)
 
-# On the following lines (which _must_ start with a tab), are the commands I need to type -- 
-# # each time my source file is modified.
+$(EXECUTABLE-L): $(SRC-L)
+	$(CC) $(CFLAGS) -c $(SRC-L)
+	$(CC) $(CFLAGS) -o $@ $(OBJ-L)
 
-$(EXECUTABLES): $(SRC)
-	$(CC) $(CFLAGS) -c $(SRC)
-	$(CC) $(CFLAGS) -o $@ $(OBJ)
-
-# By convention, I always have a target called
-# # "clean" that I used to define all temporary
-# # or intermediates.
+$(EXECUTABLE-T): $(SRC-T)
+	$(CC) $(CFLAGS) -c $(SRC-T)
+	$(CC) $(CFLAGS) -o $@ $(OBJ-T)
 
 clean:
-	rm -f $(EXECUTABLES) $(OBJ) *~
+	rm -f $(EXECUTABLE-L) $(EXECUTABLE-T) $(OBJ-L) $(OBJ-T) *~
