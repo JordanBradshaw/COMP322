@@ -33,15 +33,15 @@ void randomMoleChoose() {
         mole1 = fork();
         if (mole1 == 0) {
             execv(mArgv[0], mArgv);
-        } else {
-            if (kill(mole2, SIGCHLD) < 0) {
-                fprintf(stderr, "already dead");
-            }
-            mole2 = fork();
-            if (mole2 == 0) {
-                execv(mArgv[0], mArgv);
+        }
+    } else {
+        if (kill(mole2, SIGCHLD) < 0) {
+            fprintf(stderr, "already dead");
+        }
+        mole2 = fork();
+        if (mole2 == 0) {
+            execv(mArgv[0], mArgv);
 
-            }
         }
     }
 }
