@@ -1,12 +1,12 @@
 #Jordan Bradshaw
-#lab6
+#lab7
 
-EXECUTABLE-L=spiritd
-EXECUTABLE-T=mole
-SRC-L=spiritd.c
-SRC-T=mole.c
-OBJ-L=spiritd.o
-OBJ-T=mole.o
+EXECUTABLE-L=matrix_add
+EXECUTABLE-T=matrix_gen
+SRC-L=matrix_add.c
+SRC-T=matrix_gen.c
+OBJ-L=matrix_add.o
+OBJ-T=matrix_gen.o
 
 CC=gcc
 CFLAGS=-g
