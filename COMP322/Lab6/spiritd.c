@@ -17,34 +17,44 @@
 #include <signal.h>
 #include <unistd.h>
 #include <errno.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <time.h>
 static pid_t mole1;
 static pid_t mole2;
 static int num;
+int status1;
+int status2;
+
 
 void randomMoleChoose() {
+srand(time(NULL));///<~~~~ THIS IS WHY rand() was always returning 1
     char mNum[30];
     num = rand() % 2;
-    sprintf(mNum, "%d", num + 1);
+    snprintf(mNum,2 ,"%d", num + 1);
     char *mArgv[] = {"mole", mNum, 0};
-    if (num == 0) {
-        if (kill(mole1, SIGCHLD) < 0) {
-            fprintf(stderr, "already dead");
+    if (num == 0){
+        if (kill(mole1,SIGCHLD) < 0){
+            fprintf(stderr,"already dead");
         }
+        waitpid(mole1,&status1,0);
+        if(WIFEXITED(status1)){
         mole1 = fork();
-        if (mole1 == 0) {
-            execv(mArgv[0], mArgv);
+        if (mole1 == 0){
+        execv(mArgv[0], mArgv);}}
+    }else {
+        if (kill(mole2,SIGCHLD) < 0){
+            fprintf(stderr,"already dead");
         }
-    } else {
-        if (kill(mole2, SIGCHLD) < 0) {
-            fprintf(stderr, "already dead");
-        }
+         waitpid(mole2,&status2,0);
+         if(WIFEXITED(status2)){
         mole2 = fork();
-        if (mole2 == 0) {
-            execv(mArgv[0], mArgv);
-
+        if (mole2 == 0){
+        execv(mArgv[0], mArgv);}
         }
-    }
-}
+        }}
+    
+
 
 static void handler(int signum) {
     if (signum == SIGTERM) {
@@ -61,6 +71,7 @@ static void handler(int signum) {
 }
 
 int main(int argc, char **argv) {
+
     pid_t daemonPID;
     pid_t sid;
     if ((daemonPID = fork()) < 0)
