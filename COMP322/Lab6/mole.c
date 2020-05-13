@@ -17,10 +17,16 @@
 #include <unistd.h>
 
 int main(int argc, char **argv) {
-    FILE *fp = fopen("lab6.log", "a");
-    if (fp == NULL) {
+    char molePath[1024];
+    char path[1000];
+    strcpy(path,argv[2]);//ARGV[1] = 1 then mole 1 // ARGV[2] PATH TO LOG FILE && MOLE PROGRAM
+    //printf("%s",path);
+    snprintf(molePath,1023,"%s/lab6.log",path);///WAS BUSY WITH FINALS BUT GOT TIME TO DIAGNOSE EVERYTHING
+    FILE *fp = fopen(molePath, "a"); ///////WHEN DAEMON CHDIR EVEN IF CALLING THE PATH STILL WANTS TO PLACE lab6.log IN ROOT
+    if (fp == NULL) {///^-------------------DUE TO THIS. SO NOW WERE GOIN TO PASS PATH AS SECOND ARGUMENT
         fprintf(stderr, "Lab creation failed");
     }
+    //printf("\n%s\n",molePath);
     if (fp != 0) {
         char *mole;
         if (argc > 1 && strcmp(argv[1], "1") == 0)
