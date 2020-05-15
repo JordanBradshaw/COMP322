@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <aio.h>
 #include <errno.h>
+#include <strings.h>
 #include <time.h>
 
 /*
@@ -31,7 +32,7 @@ int main(int argc, char** argv) {
         for (int j = 0; j < N; j++) {
             for (int i = 0; i < N; i++) {
                 num = rand() % 200 - 100;
-                printf("%d ", num);
+                printf("%4d", num);
             }
             printf("\n");
         }
