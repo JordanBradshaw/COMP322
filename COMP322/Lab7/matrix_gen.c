@@ -13,14 +13,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/aio.h>
+#include <aio.h>
 #include <errno.h>
+#include <time.h>
 
 /*
  * 
  */
 int main(int argc, char** argv) {
     struct aiocb cbOut;
+    srand(time(NULL));
     int fdOut = fileno(stdout);
     int num;
     int N = atoi(argv[1]);

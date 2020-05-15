@@ -9,18 +9,19 @@ OBJ-L=matrix_add.o
 OBJ-T=matrix_gen.o
 
 CC=gcc
-CFLAGS=-g
+CFLAGS=-Wall -Wextra -g
+LIB=-lrt 
 
 all: $(EXECUTABLE-L) $(EXECUTABLE-T)
 
 
 $(EXECUTABLE-L): $(SRC-L)
-	$(CC) $(CFLAGS) -c $(SRC-L)
-	$(CC) $(CFLAGS) -o $@ $(OBJ-L)
+	$(CC) $(CFLAGS) -c $(SRC-L) $(LIB)
+	$(CC) $(CFLAGS) -o $@ $(OBJ-L) $(LIB)
 
 $(EXECUTABLE-T): $(SRC-T)
-	$(CC) $(CFLAGS) -c $(SRC-T)
-	$(CC) $(CFLAGS) -o $@ $(OBJ-T)
+	$(CC) $(CFLAGS) -c $(SRC-T) $(LIB)
+	$(CC) $(CFLAGS) -o $@ $(OBJ-T) $(LIB)
 
 clean:
 	rm -f $(EXECUTABLE-L) $(EXECUTABLE-T) $(OBJ-L) $(OBJ-T) *~
