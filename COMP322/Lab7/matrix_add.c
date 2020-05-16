@@ -65,7 +65,6 @@ void matrixAdd(struct aiocb *temp) {
     char charNum[5]; //4 DIGIT AND /0
     int intNum; /////// THE -1 IS TO COMPENSATE FOR \N ADDITION AT START
     for (CURROW = 0; CURROW < BLOCKSIZE; CURROW += ROW) {//BREAKS DOWN EACH ROW
-        //fprintf(stderr,"Current Row: %d\nCurrent Int: ",curRow);
         for (CURINT = CURROW; CURINT < (ROW + CURROW); CURINT += 4) {//BREAKS DOWN EACH INT
             memset(charNum, NULL, 5); //EXMPY OUT
             memcpy(charNum, temp->aio_buf + (CURINT), 4); //GRAB 4 CHARS OF BUFFER
@@ -77,11 +76,9 @@ void matrixAdd(struct aiocb *temp) {
 
         }
         memset(newLineBuff, '\0', ROW + 1); //EMPTY OUT
-        //memcpy(newLineBuff, temp->aio_buf + CURROW, ROW); 
         snprintf(newLineBuff, ROW, "%s", temp->aio_buf + CURROW); //GRAB ROW OFFSET BY CURROW STORE IN NEWLINEBUFF
         newLineBuff[ROW - 1] = '\n'; ////THROW NEW LINE AT END
         memcpy(temp->aio_buf + (CURROW + ROW), newLineBuff, sizeof (ROW)); //COPY NEWLINE INTO BUFFER
-        //fprintf(stderr, "%s", newLineBuff);
         memcpy(temp->aio_buf + CURROW, newLineBuff, ROW); //PUT BACK IN CBCURR->BUFFER
     }
 }
@@ -140,8 +137,6 @@ void matrixCalc() {//the lack of organization was irritating
     /////////////////////////////////////////////////
     /////////////////////////////////////////////CURRENT FINAL WRITE
     matrixAdd(&cbCurr);
-    //fprintf(stderr, "%s\n", cbCurr.aio_buf);
-    //fprintf(stderr,"blockSize: %d",blockSize);
     loadOut(&cbCurr, (PREV));
     cbCurr.aio_nbytes = (blockSize - 1); //TO COUNT FOR LAST LINE NOT HAVING /N
     retCurrWrite = aio_write(&cbCurr);
@@ -156,13 +151,22 @@ void matrixCalc() {//the lack of organization was irritating
 }
 
 int main(int argc, char** argv) {
-    clock_t begin = clock();
+    //VALID ARGS FOR COMPILER TO NOT FLAG
+    if (argc != 3) {
+        fprintf(stderr,"Arguments should be Size Blocks < matrix1.txt > matrix2.txt");
+        return (EXIT_FAILURE);
+    }
+    clock_t begin = clock(); //TIMER START
     size = atoi(argv[1]), blocks = atoi(argv[2]);
+    if (size%blocks){
+        fprintf(stderr,"Size / Blocks doesn't divide evenly");
+    }
     scalar = rand() % 101;
     fprintf(stderr, "Scalar: %d\n", scalar);
     matrixCalc(size, blocks);
     clock_t end = clock();
     double totalTime = (double) (end - begin) / CLOCKS_PER_SEC;
+    fprintf(stderr, "Total Seconds Elapsed: %lf\n", totalTime);
     return (EXIT_SUCCESS);
 }
 
