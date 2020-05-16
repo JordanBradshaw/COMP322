@@ -27,12 +27,11 @@ struct aiocb cbPrev;
 struct aiocb cbCurr;
 int CURRENT, last, next;
 int retCurrRead, retCurrWrite, retPrevWrite, retNext, retNextRead, retNextWrite;
-#define TOTAL (size*size*4)            //4K Page Size (8*8*4) = 256
-#define OFFSET (blockSize*blockSize*12)//2^12 = 4K   (8/2)^2*12 = 192
-#define BLOCKSIZE blockSize //WANTED COLOR CLARITY
-#define LAST TOTAL-BLOCKSIZE
-#define NEXT CURRENT+blockSize
-#define PREV CURRENT//-blockSize
+#define TOTAL ((size*size*4)+size) //(THIS IS DUE TO NEW LINE SO 8x8 matrix 4 bits each and 8 newline bits))
+#define BLOCKSIZE blockSize //WANTED COLOR CLARITY  //       & size amount of new lines
+//#define BLOCKSIZE 128
+#define NEXT CURRENT
+#define PREV CURRENT-blockSize
 size_t blockSize = 0;
 
 /*
@@ -63,7 +62,8 @@ void loadOut(struct aiocb *temp, off_t off) {
 }
 
 void matrixCalc(int scalar, int size, int blocks) {//the lack of organization was irritating
-    blockSize = (size * size * 4) / blocks;
+    int CURRENT = 0;
+    blockSize = (TOTAL / blocks); //THIS IS TO COMPINSATE FOR NEW LINE COUNTING AS OFFSET
     fprintf(stderr, "TotalSize: %d\n", TOTAL);
     fprintf(stderr, "BlockSize: %ld\n", blockSize);
     //////////////////////////////////////ORIGINAL LOAD (KEEP)
@@ -78,8 +78,10 @@ void matrixCalc(int scalar, int size, int blocks) {//the lack of organization wa
     ////////////////////////////////////// END OF PRE LOOP
     for (CURRENT = BLOCKSIZE; CURRENT < TOTAL; CURRENT += BLOCKSIZE) {
         /////////////////////////////////////NEXT LOAD (IN LOOP))
+        //fprintf(stderr, "Current Block %ld\n", (CURRENT - BLOCKSIZE));
         loadIn(&cbNext, NEXT);
         retNextRead = aio_read(&cbNext);
+        //fprintf(stderr,"%s", cbNext.aio_buf);
         if (retNextRead < 0) {
             fprintf(stderr, "AIO READ NEXT FAIL (2)");
         }
@@ -90,29 +92,32 @@ void matrixCalc(int scalar, int size, int blocks) {//the lack of organization wa
 
         ////////////////////////////////////////  WRITE PREV
         memcpy(&cbPrev, &cbCurr, sizeof (struct aiocb));
-        loadOut(&cbPrev, CURRENT);
-        fprintf(stderr, "%s", cbPrev.aio_buf);
+        loadOut(&cbPrev, PREV);
+        fprintf(stderr, "%s", cbCurr.aio_buf);
         retPrevWrite = aio_write(&cbPrev);
         if (retPrevWrite < 0) {
-            fprintf(stderr, "AIO PREV WRITE FAIL (3)\n");
+            fprintf(stderr, "\nAIO PREV WRITE FAIL (3)\n");
         }
         while (aio_error(&cbPrev) == EINPROGRESS) {
         }
         if ((retPrevWrite = aio_return(&cbPrev)) > 0) {
-            fprintf(stderr, "Success\n");
+            //fprintf(stderr, "Success\n");
         } else {
             int errnum;
             fprintf(stderr, "Fail %d <~~\n", errno);
             perror("PRINT ERROR");
         }/////////////////////////// SYNC OUT MOVE NEXT TO CURR
-        if (aio_fsync(O_SYNC, &cbPrev) != -1) {
+        /*if (aio_fsync(O_SYNC, &cbPrev) != -1) {
             fprintf(stderr, "\nSync success\n");
-        }
+        }*/
         memcpy(&cbCurr, &cbNext, sizeof (struct aiocb));
     }////////////////////////////////////////////END OF FOR LOOP
     /////////////////////////////////////////////////
     /////////////////////////////////////////////CURRENT FINAL WRITE
-    loadOut(&cbCurr, LAST);
+    fprintf(stderr, "%s\n", cbCurr.aio_buf);
+    //fprintf(stderr,"blockSize: %d",blockSize);
+    loadOut(&cbCurr, (PREV));
+    cbCurr.aio_nbytes = (blockSize - 1); //TO COUNT FOR LAST LINE NOT HAVING /N
     retCurrWrite = aio_write(&cbCurr);
     if (retCurrWrite < 0) {
         fprintf(stderr, "AIO CURR WRITE FAIL (4)");
@@ -120,7 +125,6 @@ void matrixCalc(int scalar, int size, int blocks) {//the lack of organization wa
     while (aio_error(&cbCurr) == EINPROGRESS) {
     }
     retCurrWrite = aio_return(&cbCurr);
-    aio_fsync(O_SYNC, &cbCurr);
     /////////////////////////////END OF MATRIX CALC
 
 }
