@@ -29,22 +29,19 @@ int CURRENT, last, next;
 int retCurrRead, retCurrWrite, retPrevWrite, retNext, retNextRead, retNextWrite;
 #define TOTAL ((size*size*4)+size) //(THIS IS DUE TO NEW LINE SO 8x8 matrix 4 bits each and 8 newline bits))
 #define BLOCKSIZE blockSize //WANTED COLOR CLARITY  //       & size amount of new lines
-//#define BLOCKSIZE 128
+#define ROW (size*4)+1 ////8 INT 4 CHARS + 1 FOR NEW LINE
 #define NEXT CURRENT
 #define PREV CURRENT-blockSize
+#define CURROW curRow
+#define CURINT curInt
 size_t blockSize = 0;
+int scalar;
+int size;
+int blocks;
 
 /*
  * 
  */
-void matrix_add(int block, int size, int scalar) {
-    for (int i = 0; i < size; i++) {
-        for (int j = 0; j < size; j++) {
-            //block[i][j] += scalar;
-        }
-    }
-
-}
 
 void loadIn(struct aiocb *temp, off_t off) {
     memset(temp, 0, sizeof (struct aiocb));
@@ -61,7 +58,35 @@ void loadOut(struct aiocb *temp, off_t off) {
     temp->aio_offset = off;
 }
 
-void matrixCalc(int scalar, int size, int blocks) {//the lack of organization was irritating
+void matrixAdd(struct aiocb *temp) {
+    char newLineBuff[ROW + 1];
+    int curRow = 0;
+    int curInt = 0;
+    char charNum[5]; //4 DIGIT AND /0
+    int intNum; /////// THE -1 IS TO COMPENSATE FOR \N ADDITION AT START
+    for (CURROW = 0; CURROW < BLOCKSIZE; CURROW += ROW) {//BREAKS DOWN EACH ROW
+        //fprintf(stderr,"Current Row: %d\nCurrent Int: ",curRow);
+        for (CURINT = CURROW; CURINT < (ROW + CURROW); CURINT += 4) {//BREAKS DOWN EACH INT
+            memset(charNum, NULL, 5); //EXMPY OUT
+            memcpy(charNum, temp->aio_buf + (CURINT), 4); //GRAB 4 CHARS OF BUFFER
+            intNum = atoi(charNum); //INT VAL OF STRING
+            intNum += scalar; //ADD SCALAR
+            memset(charNum, NULL, 5); //CLEAR OLF VAL
+            sprintf(charNum, "%4d", intNum); //MAKE IT TAKE 4 CHARS REGARDLESS
+            memcpy(temp->aio_buf + CURINT, charNum, 4); //PUT BACK IN CBCURR->BUFFER
+
+        }
+        memset(newLineBuff, '\0', ROW + 1); //EMPTY OUT
+        //memcpy(newLineBuff, temp->aio_buf + CURROW, ROW); 
+        snprintf(newLineBuff, ROW, "%s", temp->aio_buf + CURROW); //GRAB ROW OFFSET BY CURROW STORE IN NEWLINEBUFF
+        newLineBuff[ROW - 1] = '\n'; ////THROW NEW LINE AT END
+        memcpy(temp->aio_buf + (CURROW + ROW), newLineBuff, sizeof (ROW)); //COPY NEWLINE INTO BUFFER
+        //fprintf(stderr, "%s", newLineBuff);
+        memcpy(temp->aio_buf + CURROW, newLineBuff, ROW); //PUT BACK IN CBCURR->BUFFER
+    }
+}
+
+void matrixCalc() {//the lack of organization was irritating
     int CURRENT = 0;
     blockSize = (TOTAL / blocks); //THIS IS TO COMPINSATE FOR NEW LINE COUNTING AS OFFSET
     fprintf(stderr, "TotalSize: %d\n", TOTAL);
@@ -89,11 +114,11 @@ void matrixCalc(int scalar, int size, int blocks) {//the lack of organization wa
         }
         aio_return(&cbNext);
         ///////////////////////////////////////// MATRIX ADD
-
+        matrixAdd(&cbCurr);
         ////////////////////////////////////////  WRITE PREV
         memcpy(&cbPrev, &cbCurr, sizeof (struct aiocb));
         loadOut(&cbPrev, PREV);
-        fprintf(stderr, "%s", cbCurr.aio_buf);
+        //fprintf(stderr, "%s", cbCurr.aio_buf);
         retPrevWrite = aio_write(&cbPrev);
         if (retPrevWrite < 0) {
             fprintf(stderr, "\nAIO PREV WRITE FAIL (3)\n");
@@ -114,7 +139,8 @@ void matrixCalc(int scalar, int size, int blocks) {//the lack of organization wa
     }////////////////////////////////////////////END OF FOR LOOP
     /////////////////////////////////////////////////
     /////////////////////////////////////////////CURRENT FINAL WRITE
-    fprintf(stderr, "%s\n", cbCurr.aio_buf);
+    matrixAdd(&cbCurr);
+    //fprintf(stderr, "%s\n", cbCurr.aio_buf);
     //fprintf(stderr,"blockSize: %d",blockSize);
     loadOut(&cbCurr, (PREV));
     cbCurr.aio_nbytes = (blockSize - 1); //TO COUNT FOR LAST LINE NOT HAVING /N
@@ -131,9 +157,10 @@ void matrixCalc(int scalar, int size, int blocks) {//the lack of organization wa
 
 int main(int argc, char** argv) {
     clock_t begin = clock();
-    int size = atoi(argv[1]), blocks = atoi(argv[2]);
-    int scaler = rand() % 100;
-    matrixCalc(scaler, size, blocks);
+    size = atoi(argv[1]), blocks = atoi(argv[2]);
+    scalar = rand() % 101;
+    fprintf(stderr, "Scalar: %d\n", scalar);
+    matrixCalc(size, blocks);
     clock_t end = clock();
     double totalTime = (double) (end - begin) / CLOCKS_PER_SEC;
     return (EXIT_SUCCESS);
